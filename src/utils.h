@@ -224,7 +224,7 @@ class NameHandler {
     std::string getStructMbrName() { return "struct_1.mbr_" + std::to_string(struct_mbr_idx++); }
     std::string getDynamicStructMbrName() { return "struct_2->mbr_" + std::to_string(dyn_struct_mbr_idx++); }
     std::string getClassMbrName() { return "object_1.mbr_" + std::to_string(class_mbr_idx++); }
-    std::string getClassPrivateMbrName() { return "object_1.func" + std::to_string(class_private_mbr_idx++) + "()"; }
+    std::string getClassPrivateMbrName() { return "object_1.method_" + std::to_string(class_private_mbr_idx++) + "()"; }
     std::string getDynamicClassMbrName() { return "object_2->mbr_" + std::to_string(dyn_class_mbr_idx++); }
 
   private:
