@@ -145,7 +145,7 @@ def process_compiler(compilers: list, optimization: list, marches: list, extra_o
         for compiler in compilers:
             for opt in optimization:
                 if not args.compile_only:
-                    elf_name = case_name_to_elf_name(compiler, case_file, opt)
+                    elf_name = case_name_to_elf_name(compiler.split('/')[-1], case_file, opt)
                     compile_strings = []
                     compile_strings.append(compiler)
                     compile_strings.append(opt)
@@ -219,7 +219,7 @@ def process_compiler(compilers: list, optimization: list, marches: list, extra_o
 
                 else:
                     for march in marches:
-                        elf_name = case_name_to_elf_name(compiler, case_file, opt, march)
+                        elf_name = case_name_to_elf_name(compiler.split('/')[-1], case_file, opt, march)
                         compile_strings = []
                         compile_strings.append(compiler)
                         compile_strings.append(opt)
