@@ -163,7 +163,7 @@ def process_compiler(compilers: list, optimization: list, marches: list, extra_o
                     elif compile_state == State.COMPILE_CRASH:
                         insert_to_dict(case_file, compiler_internal_error, elf_name)
                         write_file(compile_cmd + '\n', cie_file)
-                        cie_log = LOG_FOLDER + "log-cie-" + compiler + case_file + opt + '.txt'
+                        cie_log = LOG_FOLDER + "log-cie-" + compiler.split('/')[-1] + case_file + opt + '.txt'
                         process = subprocess.Popen(compile_cmd, cwd=GENERATOR_OUTPUT_FOLDER, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                         output, errors = process.communicate()
                         log_string = "OUTPUT:" + output + '\n' + "ERROR:" + errors
@@ -210,7 +210,7 @@ def process_compiler(compilers: list, optimization: list, marches: list, extra_o
                         insert_to_dict(case_file, compiler_opt_error, elf_name)
                         write_file(compile_cmd + ' -> EXECUTION_CRASH\n', coe_file)
                         gdb_cmd = "gdb -q -batch -ex \"run\" -ex \"bt\" ./" + elf_name
-                        crash_log = LOG_FOLDER + "log-crash-" + compiler + case_file + '.txt'
+                        crash_log = LOG_FOLDER + "log-crash-" + compiler.split('/')[-1] + case_file + '.txt'
                         process = subprocess.Popen(gdb_cmd, cwd=GENERATOR_OUTPUT_FOLDER,shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,universal_newlines=True)
                         output, errors = process.communicate()
                         log_string = "OUTPUT:" + output + '\n' + "ERROR:" + errors
@@ -239,7 +239,7 @@ def process_compiler(compilers: list, optimization: list, marches: list, extra_o
                         elif compile_state == State.COMPILE_CRASH:
                             insert_to_dict(case_file, compiler_internal_error, elf_name)
                             write_file(compile_cmd + '\n', cie_file)
-                            cie_log = LOG_FOLDER + "log-cie-" + compiler + case_file + opt + march + '.txt'
+                            cie_log = LOG_FOLDER + "log-cie-" + compiler.split('/')[-1] + case_file + opt + march + '.txt'
                             process = subprocess.Popen(compile_cmd, cwd=GENERATOR_OUTPUT_FOLDER, shell=True,
                                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                        universal_newlines=True)
