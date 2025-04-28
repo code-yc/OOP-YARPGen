@@ -19,8 +19,20 @@ limitations under the License.
 #include "stmt.h"
 
 #include <memory>
+#include <vector>
+#include <string>
 
 namespace yarpgen {
+
+struct FunctionInfo {
+    std::string function_name;
+    std::vector<std::string> parameter_types;
+    std::string return_type;
+    std::string function_body;
+    std::vector<std::string> input;
+    std::string output;
+    std::vector<std::string> misc;
+};
 
 class ProgramGenerator {
   public:

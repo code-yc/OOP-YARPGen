@@ -63,7 +63,7 @@ target_compile_options(yarpgen_lib PRIVATE ${FLAGS})
 add_executable(yarpgen main.cpp)
 target_compile_features(yarpgen PRIVATE ${STD})
 target_compile_options(yarpgen PRIVATE ${FLAGS})
-target_link_libraries(yarpgen yarpgen_lib)
+target_link_libraries(yarpgen yarpgen_lib yaml-cpp)
 # Copy main executable next to scripts for convenience
 #add_custom_command(TARGET yarpgen
 #  POST_BUILD

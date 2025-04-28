@@ -23,8 +23,59 @@ limitations under the License.
 #include <memory>
 #include <sstream>
 #include <string>
+#include <yaml-cpp/yaml.h>
+#include <iostream>
+#include <filesystem>
 
 using namespace yarpgen;
+
+static std::vector<FunctionInfo> loadFunctionsFromYaml(const std::string& yaml_path) {
+    std::vector<FunctionInfo> functions;
+
+    try {
+        if (!std::filesystem::exists(yaml_path)) {
+            return {};
+        }
+        YAML::Node root = YAML::LoadFile(yaml_path);
+        if (!root.IsSequence()) {
+            return {};
+        }
+
+        for (const auto& node : root) {
+            FunctionInfo func;
+            try {
+                func.function_name = node["function_name"].as<std::string>();
+                if (node["parameter_types"]) {
+                    for (const auto& param : node["parameter_types"]) {
+                        func.parameter_types.push_back(param.as<std::string>());
+                    }
+                }
+                func.return_type = node["return_type"].as<std::string>();
+                func.function_body = node["function"].as<std::string>();
+                if (node["input"]) {
+                    for (const auto& input_val : node["input"]) {
+                        func.input.push_back(input_val.as<std::string>());
+                    }
+                }
+                func.output = node["output"].as<std::string>();
+                if (node["misc"]) {
+                    for (const auto& misc_line : node["misc"]) {
+                        func.misc.push_back(misc_line.as<std::string>());
+                    }
+                }
+            }
+            catch (const std::exception& e) {
+                return {};
+            }
+            functions.push_back(func);
+        }
+    }
+    catch (const std::exception& e) {
+        return {};
+    }
+
+    return functions;
+}
 
 ProgramGenerator::ProgramGenerator() : hash_seed(0) {
     // Generate the general structure of the test
@@ -47,6 +98,12 @@ ProgramGenerator::ProgramGenerator() : hash_seed(0) {
         ext_inp_sym_tbl->addVarExpr(
             std::make_shared<ScalarVarUseExpr>(new_var));
     }
+
+    auto functions = loadFunctionsFromYaml("../runner/functions.yaml");
+
+    if (!functions.empty()) {
+            // Inject function here
+        }
 
     pop_ctx->setExtInpSymTable(ext_inp_sym_tbl);
     pop_ctx->setExtOutSymTable(ext_out_sym_tbl);

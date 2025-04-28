@@ -12,6 +12,11 @@
 
 ### 一、安装与部署
 
+安装 `yaml-cpp` 库
+```
+sudo apt-get install libyaml-cpp-dev
+```
+
 在项目根目录执行如下指令：
 
 创建 `build` 文件夹
