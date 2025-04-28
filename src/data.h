@@ -36,9 +36,11 @@ class EmitCtx;
 
 class Data {
   public:
-    Data(std::string _name, std::shared_ptr<Type> _type)
+    Data(std::string _name, std::shared_ptr<Type> _type,
+        bool _is_func = false, std::string _origin_name = "")
         : name(std::move(_name)), type(std::move(_type)),
-          ub_code(UBKind::Uninit), is_dead(true), alignment(0) {}
+          ub_code(UBKind::Uninit), is_dead(true), alignment(0),
+          is_func(_is_func), origin_name(_origin_name.empty() ? _name : _origin_name){}
     virtual ~Data() = default;
 
     virtual std::string getName(std::shared_ptr<EmitCtx> ctx) { return name; }
@@ -68,6 +70,12 @@ class Data {
     void setAlignment(size_t _alignment) { alignment = _alignment; }
     size_t getAlignment() { return alignment; }
 
+    void setIsFunc(bool val) { is_func = val; }
+    bool getIsFunc() { return is_func; }
+
+    void setOriginName(std::string _origin_name) { origin_name = _origin_name; }
+    std::string getOriginName() { return origin_name; }
+
   protected:
     template <typename T> static std::shared_ptr<Data> makeVaryingImpl(T val) {
         auto ret = std::make_shared<T>(val);
@@ -86,6 +94,9 @@ class Data {
     // They create a lot of dead code in the test, so we need to prune them.
     bool is_dead;
     size_t alignment;
+
+    bool is_func = false;
+    std::string origin_name = "";
 };
 
 // Shorthand to make it simpler
@@ -115,9 +126,10 @@ class TypedData : public Data {
 class ScalarVar : public Data {
   public:
     ScalarVar(std::string _name, const std::shared_ptr<IntegralType> &_type,
-              IRValue _init_value)
-        : Data(std::move(_name), _type), init_val(_init_value),
-          cur_val(_init_value){
+              IRValue _init_value, bool _is_func = false, std::string _origin_name = "")
+        : Data(std::move(_name), _type, _is_func,
+               _origin_name.empty() ? _name : _origin_name),
+        init_val(_init_value), cur_val(_init_value){
         ub_code = init_val.getUBCode();
     }
     bool isScalarVar() final { return true; }

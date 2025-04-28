@@ -804,7 +804,11 @@ static bool emitVarFuncParam(std::shared_ptr<EmitCtx> ctx, std::ostream &stream,
             }
             else{
                 stream << var->getType()->getName(ctx) << " ";
-                stream << var->getName(ctx);
+                if (var->getIsFunc()) {
+                    stream << var->getOriginName();
+                } else {
+                    stream << var->getName(ctx);
+                }
             }
         }
 
@@ -848,7 +852,11 @@ static bool emitVarFuncParamInMain(std::shared_ptr<EmitCtx> ctx, std::ostream &s
             }
         }
         else{
-            stream << var->getName(ctx);
+            if (var->getIsFunc()) {
+                stream << var->getOriginName();
+            } else {
+                stream << var->getName(ctx);
+            }
         }
         emit_any = true;
     }
@@ -921,24 +929,6 @@ void emitSYCLAccessors(std::shared_ptr<EmitCtx> ctx, std::ostream &stream,
 void ProgramGenerator::emitTest(std::shared_ptr<EmitCtx> ctx,
                                 std::ostream &stream) {
     Options &options = Options::getInstance();
-//    stream << "#include \"init.h\"\n";
-//    if (options.isC()) {
-//        MinCall::emitCDefinition(ctx, stream);
-//        MaxCall::emitCDefinition(ctx, stream);
-//    }
-//    if (options.isCXX())
-//        stream << "#include <algorithm>\n";
-//    else if (options.isSYCL()) {
-//        stream << "#include <CL/sycl.hpp>\n";
-//        stream << "#if defined(FPGA) || defined(FPGA_EMULATOR)\n";
-//        stream << "    #include <CL/sycl/intel/fpga_extensions.hpp>\n";
-//        stream << "#endif\n";
-//    }
-//
-//    if (options.isISPC()) {
-//        ctx->setIspcTypes(true);
-//        stream << "export ";
-//    }
     stream << "void test(";
 
     bool emit_any = emitVarFuncParam(ctx, stream, ext_inp_sym_tbl->getVars(),
@@ -948,48 +938,8 @@ void ProgramGenerator::emitTest(std::shared_ptr<EmitCtx> ctx,
                        true, options.isISPC(), true);
 
     stream << ") ";
-
-    if (options.isSYCL()) {
-        stream << "{\n";
-        stream << "    using namespace cl::sycl;\n\n";
-        stream << "    {\n";
-
-        stream << "#if defined(CPU)\n";
-        stream << "        cpu_selector selector;\n";
-        stream << "#elif defined(GPU)\n";
-        stream << "        gpu_selector selector;\n";
-        stream << "#elif defined(FPGA_EMULATOR)\n";
-        stream << "        intel::fpga_emulator_selector selector;\n";
-        stream << "#elif defined(FPGA)\n";
-        stream << "        intel::fpga_selector selector;\n";
-        stream << "#else\n";
-        stream << "        default_selector selector;\n";
-        stream << "#endif\n";
-        stream << "        queue myQueue(selector);\n";
-        emitSYCLBuffers(ctx, stream, "        ", ext_inp_sym_tbl->getVars());
-        emitSYCLBuffers(ctx, stream, "        ", ext_out_sym_tbl->getVars());
-
-        stream << "        myQueue.submit([&](handler & cgh) {\n";
-        emitSYCLAccessors(ctx, stream, "            ",
-                          ext_inp_sym_tbl->getVars(), true);
-        emitSYCLAccessors(ctx, stream, "            ",
-                          ext_out_sym_tbl->getVars(), false);
-        stream << "            cgh.single_task<class test_func>([=] ()\n";
-    }
-
-    if (options.isSYCL())
-        ctx->setSYCLAccess(true);
     new_test->emit(ctx, stream, !options.isSYCL() ? "" : "            ");
     stream << "\n";
-
-    if (options.isSYCL()) {
-        stream << "            );\n";
-        stream << "        });\n";
-        stream << "    }\n";
-        stream << "}\n";
-    }
-    ctx->setSYCLAccess(false);
-    ctx->setIspcTypes(false);
 }
 
 static void emitDeleteStmt(std::shared_ptr<EmitCtx> ctx,

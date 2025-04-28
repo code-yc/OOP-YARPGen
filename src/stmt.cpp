@@ -91,10 +91,16 @@ void DeclStmt::emit(std::shared_ptr<EmitCtx> ctx, std::ostream &stream,
     stream << offset;
     // TODO: we need to do the right thing here
     stream << data->getType()->getName(ctx) << " ";
-    stream << data->getName(ctx);
-    if (init_expr.use_count() != 0) {
+    if (data->getIsFunc()) {
+        stream << data->getOriginName();
         stream << " = ";
-        init_expr->emit(ctx, stream);
+        stream << data->getName(ctx);
+    } else {
+        stream << data->getName(ctx);
+        if (init_expr.use_count() != 0) {
+            stream << " = ";
+            init_expr->emit(ctx, stream);
+        }
     }
     stream << ";";
 }
