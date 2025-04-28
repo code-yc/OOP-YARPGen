@@ -4,6 +4,9 @@ import traceback
 import time
 import datetime
 import os
+import zipfile
+import yaml
+import random
 
 
 def run_cmd(command: list, working_dir: str, timeout: int = 5):
@@ -84,3 +87,40 @@ def delete_files_with_substring(directory, substring):
     for filename in os.listdir(directory):
         if substring in filename and os.path.isfile(os.path.join(directory, filename)):
             os.remove(os.path.join(directory, filename))
+
+
+class LiteralString(str):
+    pass
+
+def literal_representer(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+# 注册自定义的LiteralString
+yaml.add_representer(LiteralString, literal_representer)
+
+def generate_random_function_batch_from_zip(zip_path, batch_size, total_files):
+    output_dir= "./"
+    output_yaml_name= "functions.yaml"
+    # 随机抽取不同编号
+    random_ids = random.sample(range(1, total_files + 1), min(batch_size, total_files))
+
+    merged_data = []
+
+    with zipfile.ZipFile(zip_path, 'r') as zipf:
+        for idx in random_ids:
+            filename = f"func_{idx}.yaml"
+            try:
+                with zipf.open(filename) as file:
+                    yaml_data = yaml.safe_load(file)
+                    # 把 function 字段处理成 LiteralString，以便输出成 |- 样式
+                    if 'function' in yaml_data:
+                        yaml_data['function'] = LiteralString(yaml_data['function'].strip())
+                    merged_data.append(yaml_data)
+            except KeyError:
+                print(f"Warning: {filename} not found in zip archive.")
+
+    # 写出到一个新的yaml文件
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, output_yaml_name)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        yaml.dump(merged_data, f, sort_keys=False, allow_unicode=True)

@@ -1,9 +1,16 @@
+# 配置：基本生成与测试
 language : "cpp"
 generator_path : "../build/yarpgen"
 testing_path : "../Testing"
 timeout : 60
 run_count : 100
 
+# 配置：函数注入功能
+func_source_path : "./functions.zip"
+func_batch_size : 5
+func_total : 20000
+
+# 配置：编译器及其选项
 compiler :
   - "g++"
   - "clang++"

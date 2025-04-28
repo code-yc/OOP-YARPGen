@@ -21,12 +21,17 @@ args = parser.parse_args()
 with open(args.yaml_file, 'r') as file:
     config = yaml.safe_load(file)
 
+# 获取测试的参数
 language = config.get('language')
 GENERATOR_ELF = config.get('generator_path')
 TEST_PATH = config.get('testing_path')
 timeout = config.get('timeout')
 run_count = config.get('run_count')
 
+# 获取函数注入的参数
+func_source_path = config.get('func_source_path')
+func_batch_size = config.get('func_batch_size')
+func_total = config.get('func_total')
 
 TIME_STR = get_current_time_str()
 
@@ -70,6 +75,7 @@ def generator_runner(test_num: int = 1):
 
     for i in range(test_num):
         output_file = GENERATOR_OUTPUT_FOLDER + TIME_STR + '--' + str(i+1) + file_ext
+        generate_random_function_batch_from_zip(func_source_path, func_batch_size, func_total)
         print("generating " + output_file)
         cmd = GENERATOR_ELF + " -o " + output_file
         os.system(cmd)
